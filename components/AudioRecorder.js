@@ -2,7 +2,6 @@
 
 // reference : https://blog.logrocket.com/how-to-create-video-audio-recorder-react/
 
-
 import React, { useState, useRef, useEffect } from "react";
 
 const mimeType = "audio/wav";
@@ -25,9 +24,10 @@ export const AudioRecorder = () => {
       if (recordingStatus !== "recording") {
         return;
       }
-      if (seconds !=  0 && seconds % 5 === 0) {
-        // stopRecording();
-        // startRecording();
+      if (seconds !== 0 && seconds % 5 === 0) {
+        // PROBLEM: this is not working.
+        stopRecording();
+        startRecording();
       }
       setSeconds(seconds => seconds + 1);
     }, 1000);
@@ -35,6 +35,7 @@ export const AudioRecorder = () => {
   }, [seconds, recordingStatus]);
 
   const startRecording = () => {
+    console.log("start");
     setRecordingStatus("recording");
     //create new Media recorder instance using the stream
     const media = new MediaRecorder(stream, { type: mimeType });
@@ -52,6 +53,7 @@ export const AudioRecorder = () => {
   };
 
   const stopRecording = () => {
+    console.log("stop");
     setRecordingStatus("inactive");
     //stops the recording instance
     mediaRecorder.current.stop();
@@ -89,19 +91,19 @@ export const AudioRecorder = () => {
     <div className="audio-controls">
       <h1>Have played {seconds}s</h1>
       {!permission ? (
-        <button onClick={getMicrophonePermission}>
+        <button class="btn btn-blue" type="button" onClick={getMicrophonePermission}>
           Get Microphone Permission
         </button>
       ) : null}
 
       {permission && recordingStatus === "inactive" ? (
-        <button onClick={startRecording} type="button">
+        <button class="btn btn-blue" type="button" onClick={startRecording}>
           Start Recording
         </button>
       ) : null}
 
       {recordingStatus === "recording" ? (
-        <button onClick={stopRecording} type="button">
+        <button class="btn btn-blue" type="button" onClick={stopRecording}>
           Stop recording
         </button>
       ) : null}
