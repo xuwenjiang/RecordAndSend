@@ -26,8 +26,8 @@ export const AudioRecorder = () => {
       }
       if (seconds !== 0 && seconds % 5 === 0) {
         // PROBLEM: this is not working.
-        stopRecording();
-        startRecording();
+        // stopRecording();
+        // startRecording();
       }
       setSeconds(seconds => seconds + 1);
     }, 1000);
@@ -42,15 +42,30 @@ export const AudioRecorder = () => {
     //set the MediaRecorder instance to the mediaRecorder ref
     mediaRecorder.current = media;
     //invokes the start method to start the recording process
-    mediaRecorder.current.start();
-    let localAudioChunks = [];
+    mediaRecorder.current.start(5000);
+    
     mediaRecorder.current.ondataavailable = (event) => {
        if (typeof event.data === "undefined") return;
        if (event.data.size === 0) return;
+
+       console.log("hello");
+
+       let localAudioChunks = [];
        localAudioChunks.push(event.data);
+       handleRecordedChunks(localAudioChunks);
     };
-    setAudioChunks(localAudioChunks);
   };
+
+  const handleRecordedChunks = (data) => {
+    var cloned = Object.assign([], data);
+    const audioBlob = new Blob(data, { type: mimeType });
+    var reader = new FileReader();
+    reader.readAsDataURL(audioBlob);
+    reader.onloadend = function () { 
+      var base64String = reader.result;
+      console.log(base64String);
+    }
+  }
 
   const stopRecording = () => {
     console.log("stop");
@@ -91,19 +106,19 @@ export const AudioRecorder = () => {
     <div className="audio-controls">
       <h1>Have played {seconds}s</h1>
       {!permission ? (
-        <button class="btn btn-blue" type="button" onClick={getMicrophonePermission}>
+        <button className="btn btn-blue" type="button" onClick={getMicrophonePermission}>
           Get Microphone Permission
         </button>
       ) : null}
 
       {permission && recordingStatus === "inactive" ? (
-        <button class="btn btn-blue" type="button" onClick={startRecording}>
+        <button className="btn btn-blue" type="button" onClick={startRecording}>
           Start Recording
         </button>
       ) : null}
 
       {recordingStatus === "recording" ? (
-        <button class="btn btn-blue" type="button" onClick={stopRecording}>
+        <button className="btn btn-blue" type="button" onClick={stopRecording}>
           Stop recording
         </button>
       ) : null}
