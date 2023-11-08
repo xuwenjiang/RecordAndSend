@@ -1,64 +1,56 @@
 "use client"
 
 // reference : https://blog.logrocket.com/how-to-create-video-audio-recorder-react/
+// reference : https://stackoverflow.com/questions/51325136/record-5-seconds-segments-of-audio-using-mediarecorder-and-then-upload-to-the-se
+// current status : can not stop
 
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useState, useRef } from "react";
 
 const mimeType = "audio/wav";
 
 export const AudioRecorder = () => {
-  // some status variables
-  const [permission, setPermission] = useState(false);
-  const [recordingStatus, setRecordingStatus] = useState("inactive");
 
-  // some code to record audio. This is the whole audio recorded.
   const mediaRecorder  = useRef(null);
+
+  var recordingStatus = "inactive";
+  const [permission, setPermission] = useState(false);
   const [stream, setStream] = useState(null);
   const [audioChunks, setAudioChunks] = useState([]);
 
-  // some of my controling code
-  const [seconds, setSeconds] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (recordingStatus !== "recording") {
-        return;
-      }
-      if (seconds !== 0 && seconds % 5 === 0) {
-        // PROBLEM: this is not working.
-        // stopRecording();
-        // startRecording();
-      }
-      setSeconds(seconds => seconds + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [seconds, recordingStatus]);
-
+  // method to start recording.
   const startRecording = () => {
-    console.log("start");
-    setRecordingStatus("recording");
-    //create new Media recorder instance using the stream
+    console.log("start clicked");
+
+    recordingStatus = "recording";
+
+    setAudioChunks([]);
+
     const media = new MediaRecorder(stream, { type: mimeType });
-    //set the MediaRecorder instance to the mediaRecorder ref
     mediaRecorder.current = media;
-    //invokes the start method to start the recording process
-    mediaRecorder.current.start(5000);
     
     mediaRecorder.current.ondataavailable = (event) => {
-       if (typeof event.data === "undefined") return;
-       if (event.data.size === 0) return;
-
-       console.log("hello");
-
-       let localAudioChunks = [];
-       localAudioChunks.push(event.data);
-       handleRecordedChunks(localAudioChunks);
+      audioChunks.push(event.data);
     };
+
+    mediaRecorder.current.onstop = () => {
+      var actualChunks = audioChunks.splice(0, audioChunks.length);
+      handleRecordedChunks(actualChunks);
+    };
+
+    recordChunk();
+  };
+
+  // method to stop recording.
+  const stopRecording = () => {
+    console.log("stop clicked");
+    recordingStatus = "inactive";
+    mediaRecorder.current.stop();
   };
 
   const handleRecordedChunks = (data) => {
     var cloned = Object.assign([], data);
-    const audioBlob = new Blob(data, { type: mimeType });
+    const audioBlob = new Blob(cloned, { type: mimeType });
     var reader = new FileReader();
     reader.readAsDataURL(audioBlob);
     reader.onloadend = function () { 
@@ -67,23 +59,19 @@ export const AudioRecorder = () => {
     }
   }
 
-  const stopRecording = () => {
-    console.log("stop");
-    setRecordingStatus("inactive");
-    //stops the recording instance
-    mediaRecorder.current.stop();
-    mediaRecorder.current.onstop = () => {
-       const audioBlob = new Blob(audioChunks, { type: mimeType });
+  const recordChunk = () => {
+    console.log("recording chunks, and status is " + recordingStatus);
+    mediaRecorder.current.start();
+    setTimeout(() => {
+      if(mediaRecorder.current.state == "recording") {
+        mediaRecorder.current.stop();
+      }
 
-       var reader = new FileReader(); 
-       reader.readAsDataURL(audioBlob); 
-       reader.onloadend = function () { 
-        var base64String = reader.result; 
-        console.log(base64String);
-       }
-       setAudioChunks([]);
-    };
-  };
+      if (recordingStatus == "recording") {
+        recordChunk();
+      }
+    }, 5000);
+  }
 
   const getMicrophonePermission = async () => {
     if ("MediaRecorder" in window) {
@@ -104,24 +92,25 @@ export const AudioRecorder = () => {
 
   return (
     <div className="audio-controls">
-      <h1>Have played {seconds}s</h1>
+      <h1>status: {recordingStatus}</h1>
       {!permission ? (
         <button className="btn btn-blue" type="button" onClick={getMicrophonePermission}>
           Get Microphone Permission
         </button>
       ) : null}
 
-      {permission && recordingStatus === "inactive" ? (
-        <button className="btn btn-blue" type="button" onClick={startRecording}>
-          Start Recording
-        </button>
+      {permission ? (
+        <div>
+          <button className="btn btn-blue" type="button" onClick={startRecording}>
+            Start Recording
+          </button>
+          <button className="btn btn-blue" type="button" onClick={stopRecording}>
+            Stop recording
+          </button>
+        </div>
       ) : null}
 
-      {recordingStatus === "recording" ? (
-        <button className="btn btn-blue" type="button" onClick={stopRecording}>
-          Stop recording
-        </button>
-      ) : null}
+      
 
       {/* {audio ? (
         <div className="audio-container">
