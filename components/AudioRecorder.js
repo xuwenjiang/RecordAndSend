@@ -6,6 +6,7 @@
 
 
 import React, { useState, useRef } from "react";
+import {UserInput} from "./UserInput";
 
 const mimeType = "audio/wav";
 
@@ -92,6 +93,7 @@ export const AudioRecorder = () => {
 
   return (
     <div className="audio-controls">
+      <UserInput/>
       <h1>status: {recordingStatus}</h1>
       {!permission ? (
         <button className="btn btn-blue" type="button" onClick={getMicrophonePermission}>
