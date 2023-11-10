@@ -1,23 +1,37 @@
+// Current status, you have to quickly click the start recording button twice to get it to work.
+
 "use client"
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const mimeType = "audio/wav";
 
 export const AudioRecorder = ({ onAudioData }) => {
 
   const mediaRecorder = useRef(null);
-
-  var recordingStatus = "inactive";
+  const [recordingStatus, setRecordingStatus] = useState("inactive");
   const [permission, setPermission] = useState(false);
   const [stream, setStream] = useState(null);
   const [audioChunks, setAudioChunks] = useState([]);
+  const timeoutRef = useRef(null); // To keep track of the timeout
+
+  useEffect(() => {
+    console.log("useEffect " + recordingStatus);
+    // This will be called when recordingStatus changes.
+    if (recordingStatus === "inactive") {
+      if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+        mediaRecorder.current.stop();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current); // Clear the timeout if recording is stopped
+      }
+    }
+  }, [recordingStatus]); // Depend on recordingStatus
 
   // method to start recording.
   const startRecording = () => {
-    console.log("start clicked");
-
-    recordingStatus = "recording";
+    console.log("startRecording");
+    setRecordingStatus("recording"); // Use state to set the recording status
 
     setAudioChunks([]);
 
@@ -33,14 +47,14 @@ export const AudioRecorder = ({ onAudioData }) => {
       handleRecordedChunks(actualChunks);
     };
 
+    mediaRecorder.current.start();
     recordChunk();
   };
 
   // method to stop recording.
   const stopRecording = () => {
-    console.log("stop clicked");
-    recordingStatus = "inactive";
-    mediaRecorder.current.stop();
+    console.log("stopRecording");
+    setRecordingStatus("inactive"); // Use state to set the recording status
   };
 
   const handleRecordedChunks = (data) => {
@@ -57,18 +71,17 @@ export const AudioRecorder = ({ onAudioData }) => {
   }
 
   const recordChunk = () => {
-    console.log("recording chunks, and status is " + recordingStatus);
-    mediaRecorder.current.start();
-    setTimeout(() => {
-      if (mediaRecorder.current.state == "recording") {
-        mediaRecorder.current.stop();
-      }
-
-      if (recordingStatus == "recording") {
-        recordChunk();
-      }
-    }, 5000);
-  }
+    console.log("recordChunk ", recordingStatus);
+    if (recordingStatus === "recording") {
+      timeoutRef.current = setTimeout(() => {
+        if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+          mediaRecorder.current.stop();
+          mediaRecorder.current.start();
+          recordChunk();
+        }
+      }, 5000); // Record a chunk every 5 seconds
+    }
+  };
 
   const getMicrophonePermission = async () => {
     if ("MediaRecorder" in window) {
