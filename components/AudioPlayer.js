@@ -20,6 +20,11 @@ export const AudioPlayer = ({ base64AudioQueue }) => {
     }
   };
 
+  // Function to reset the audio index to 0
+  const resetAudioIndex = () => {
+    setCurrentAudioIndex(0);
+  };
+
   return (
     <div>
       {audioSrc && (
@@ -32,6 +37,7 @@ export const AudioPlayer = ({ base64AudioQueue }) => {
           Your browser does not support the audio element.
         </audio>
       )}
+      <button onClick={resetAudioIndex}>Reset Audio</button>
     </div>
   );
 };
