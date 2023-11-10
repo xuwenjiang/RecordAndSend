@@ -1,18 +1,12 @@
 "use client"
 
-// reference : https://blog.logrocket.com/how-to-create-video-audio-recorder-react/
-// reference : https://stackoverflow.com/questions/51325136/record-5-seconds-segments-of-audio-using-mediarecorder-and-then-upload-to-the-se
-// current status : can not stop
-
-
 import React, { useState, useRef } from "react";
-import {UserInput} from "./UserInput";
 
 const mimeType = "audio/wav";
 
-export const AudioRecorder = () => {
+export const AudioRecorder = ({ onAudioData }) => {
 
-  const mediaRecorder  = useRef(null);
+  const mediaRecorder = useRef(null);
 
   var recordingStatus = "inactive";
   const [permission, setPermission] = useState(false);
@@ -29,7 +23,7 @@ export const AudioRecorder = () => {
 
     const media = new MediaRecorder(stream, { type: mimeType });
     mediaRecorder.current = media;
-    
+
     mediaRecorder.current.ondataavailable = (event) => {
       audioChunks.push(event.data);
     };
@@ -54,9 +48,11 @@ export const AudioRecorder = () => {
     const audioBlob = new Blob(cloned, { type: mimeType });
     var reader = new FileReader();
     reader.readAsDataURL(audioBlob);
-    reader.onloadend = function () { 
+
+    reader.onloadend = function () {
       var base64String = reader.result;
-      console.log(base64String);
+      onAudioData(base64String);
+      console.log("base64String", base64String);
     }
   }
 
@@ -64,7 +60,7 @@ export const AudioRecorder = () => {
     console.log("recording chunks, and status is " + recordingStatus);
     mediaRecorder.current.start();
     setTimeout(() => {
-      if(mediaRecorder.current.state == "recording") {
+      if (mediaRecorder.current.state == "recording") {
         mediaRecorder.current.stop();
       }
 
@@ -93,7 +89,6 @@ export const AudioRecorder = () => {
 
   return (
     <div className="audio-controls">
-      <UserInput/>
       <h1>status: {recordingStatus}</h1>
       {!permission ? (
         <button className="btn btn-blue" type="button" onClick={getMicrophonePermission}>
@@ -111,14 +106,6 @@ export const AudioRecorder = () => {
           </button>
         </div>
       ) : null}
-
-      
-
-      {/* {audio ? (
-        <div className="audio-container">
-          <audio src={audio} controls></audio>
-        </div>
-      ) : null} */}
     </div>
   );
 };

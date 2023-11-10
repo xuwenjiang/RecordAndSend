@@ -1,4 +1,4 @@
-import { AudioRecorder } from '../components/AudioRecorder'; 
+import { AudioApp } from '../components/AudioApp'; 
 
 export default function Home() {
   return (
@@ -8,7 +8,7 @@ export default function Home() {
       </div>
 
       <div className="relative flex place-items-center">
-        <AudioRecorder/>
+        <AudioApp/>
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
