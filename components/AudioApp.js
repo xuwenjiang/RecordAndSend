@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { AudioRecorder } from './AudioRecorder';
 import { UserInput } from './UserInput';
+import { AudioPlayer } from './AudioPlayer';
 
 export const AudioApp = () => {
+  const [audioQueue, setAudioQueue] = useState([]);
   const [base64Audio, setBase64Audio] = useState('');
   const [userInputs, setUserInputs] = useState({
     alpha: 0.75,
@@ -21,6 +23,10 @@ export const AudioApp = () => {
     }
   });
 
+  const addAudioToQueue = (newBase64Audio) => {
+    setAudioQueue((prevQueue) => [...prevQueue, newBase64Audio]);
+  };
+
   // Function to update the base64Audio state
   const handleAudioData = (base64String) => {
     setBase64Audio(base64String);
@@ -32,6 +38,8 @@ export const AudioApp = () => {
   };
 
   const onAudioData = async (base64Audio) => {
+    
+    addAudioToQueue(base64Audio);
     // Construct the payload with user inputs and the audio data
     const payload = {
       ...userInputs,
@@ -65,6 +73,7 @@ export const AudioApp = () => {
     <div>
       <UserInput userInputs={userInputs} onUserInputChange={handleUserInput} />
       <AudioRecorder onAudioData={onAudioData} />
+      <AudioPlayer base64AudioQueue={audioQueue} />
     </div>
   );
 };
