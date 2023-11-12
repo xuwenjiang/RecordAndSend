@@ -45,7 +45,7 @@ export const AudioApp = () => {
     const payload = {
       ...userInputs,
       audioBase64: base64Audio,
-      requestId: getCurrentDateString(),
+      requestId: "helloworld123"
     };
 
     payload.start.seed = seed;
@@ -54,10 +54,10 @@ export const AudioApp = () => {
 
     // Make the POST request to the server
     try {
-      const response = await fetch('http://127.0.0.1:3013/run_my_riffsion/', {
+      const response = await fetch('/api/proxyRiffusion', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload),
       });
