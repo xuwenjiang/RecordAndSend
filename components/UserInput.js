@@ -19,30 +19,47 @@ export const UserInput = ({ userInputs, onUserInputChange }) => {
   // });
 
   const handleChange = e => {
+    var value = sanitizing(e);
     onUserInputChange({
       ...userInputs,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
   const handleStartChange = e => {
+    var value = sanitizing(e);
     onUserInputChange({
       ...userInputs,
       start: {
         ...userInputs.start,
-        [e.target.name]: e.target.value
+        [e.target.name]: value
       }
     });
   };
 
   const handleEndChange = e => {
+    var value = sanitizing(e);
     onUserInputChange({
       ...userInputs,
       end: {
         ...userInputs.end,
-        [e.target.name]: e.target.value
+        [e.target.name]: value
       }
     });
+  };
+
+  const sanitizing = e => {
+    var value = e.target.value;
+
+    if (e.target.name === 'num_inference_steps') {
+      value = value ? parseInt(value) : 20;
+    } else if (e.target.name === 'prompt') {
+      value = value ? value : ""
+    } else {
+      value = value ? parseFloat(value) : 1.0;
+    }
+
+    return value;
   };
 
   return (
@@ -58,7 +75,7 @@ export const UserInput = ({ userInputs, onUserInputChange }) => {
       <div className="input-group"></div>
       <div className="input-group">
         <label htmlFor="start.prompt" className="input-label">start prompt</label>
-        <input id="start.prompt" name="prompt" value={userInputs.start.prompt || ''} onChange={handleStartChange} className="input-input" />
+        <input id="start.prompt" name="prompt" value={userInputs.start.prompt || ''} onChange={handleStartChange} className="input-input"/>
       </div>
       <div className="input-group">
         <label htmlFor="start.denoising" className="input-label">denoising</label>

@@ -25,12 +25,13 @@ export const AudioRecorder = ({ onAudioData }) => {
         clearTimeout(timeoutRef.current); // Clear the timeout if recording is stopped
       }
     }
+    else {
+      recordChunk();
+    }
   }, [recordingStatus]); // Depend on recordingStatus
 
   // method to start recording.
   const startRecording = () => {
-    setRecordingStatus("recording"); // Use state to set the recording status
-
     setAudioChunks([]);
 
     const media = new MediaRecorder(stream, { type: mimeType });
@@ -46,7 +47,7 @@ export const AudioRecorder = ({ onAudioData }) => {
     };
 
     mediaRecorder.current.start();
-    recordChunk();
+    setRecordingStatus("recording"); // Use state to set the recording status
   };
 
   // method to stop recording.
@@ -67,15 +68,13 @@ export const AudioRecorder = ({ onAudioData }) => {
   }
 
   const recordChunk = () => {
-    if (recordingStatus === "recording") {
-      timeoutRef.current = setTimeout(() => {
-        if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
-          mediaRecorder.current.stop();
-          mediaRecorder.current.start();
-          recordChunk();
-        }
-      }, 5000); // Record a chunk every 5 seconds
-    }
+    timeoutRef.current = setTimeout(() => {
+      if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+        mediaRecorder.current.stop();
+        mediaRecorder.current.start();
+        recordChunk();
+      }
+    }, 5120); // Record a chunk every 5120ms
   };
 
   const getMicrophonePermission = async () => {

@@ -45,7 +45,7 @@ export const AudioApp = () => {
     const payload = {
       ...userInputs,
       audioBase64: base64Audio,
-      requestId: "helloworld123"
+      requestId: getCurrentDateString()
     };
 
     payload.start.seed = seed;
