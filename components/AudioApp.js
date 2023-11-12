@@ -6,6 +6,7 @@ import { UserInput } from './UserInput';
 import { AudioPlayer } from './AudioPlayer';
 
 export const AudioApp = () => {
+  var seed = 1;
   const [audioQueue, setAudioQueue] = useState([]);
   const [base64Audio, setBase64Audio] = useState('');
   const [userInputs, setUserInputs] = useState({
@@ -14,12 +15,14 @@ export const AudioApp = () => {
     start: {
       prompt: "church bells on sunday",
       denoising: 0.75,
-      guidance: 7.0
+      guidance: 7.0,
+      seed: 1
     },
     end: {
       prompt: "jazz with piano",
       denoising: 0.75,
-      guidance: 7.0
+      guidance: 7.0,
+      seed: 1
     }
   });
 
@@ -38,17 +41,20 @@ export const AudioApp = () => {
   };
 
   const onAudioData = async (base64Audio) => {
-    
-    addAudioToQueue(base64Audio);
     // Construct the payload with user inputs and the audio data
     const payload = {
       ...userInputs,
-      audio: base64Audio
+      audioBase64: base64Audio,
+      requestId: getCurrentDateString(),
     };
+
+    payload.start.seed = seed;
+    payload.end.seed = seed;
+    seed++;
 
     // Make the POST request to the server
     try {
-      const response = await fetch('http://localhost:3000/run', {
+      const response = await fetch('http://127.0.0.1:3013/run_my_riffsion/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,12 +67,25 @@ export const AudioApp = () => {
       }
 
       const data = await response.json();
-      console.log('Data received:', data);
+      addAudioToQueue(data.audio);
       // Handle the response data as needed
     } catch (error) {
       console.error('Error sending data to the server:', error);
       // Error handling
     }
+  };
+
+  const getCurrentDateString = () => {
+    const now = new Date();
+  
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+  
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
   };
 
   return (

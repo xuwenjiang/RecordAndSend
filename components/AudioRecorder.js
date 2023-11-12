@@ -16,7 +16,6 @@ export const AudioRecorder = ({ onAudioData }) => {
   const timeoutRef = useRef(null); // To keep track of the timeout
 
   useEffect(() => {
-    console.log("useEffect " + recordingStatus);
     // This will be called when recordingStatus changes.
     if (recordingStatus === "inactive") {
       if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
@@ -30,7 +29,6 @@ export const AudioRecorder = ({ onAudioData }) => {
 
   // method to start recording.
   const startRecording = () => {
-    console.log("startRecording");
     setRecordingStatus("recording"); // Use state to set the recording status
 
     setAudioChunks([]);
@@ -53,7 +51,6 @@ export const AudioRecorder = ({ onAudioData }) => {
 
   // method to stop recording.
   const stopRecording = () => {
-    console.log("stopRecording");
     setRecordingStatus("inactive"); // Use state to set the recording status
   };
 
@@ -66,12 +63,10 @@ export const AudioRecorder = ({ onAudioData }) => {
     reader.onloadend = function () {
       var base64String = reader.result;
       onAudioData(base64String);
-      console.log("base64String", base64String);
     }
   }
 
   const recordChunk = () => {
-    console.log("recordChunk ", recordingStatus);
     if (recordingStatus === "recording") {
       timeoutRef.current = setTimeout(() => {
         if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
