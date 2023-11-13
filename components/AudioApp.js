@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AudioRecorder } from './AudioRecorder';
 import { UserInput } from './UserInput';
 import { AudioPlayer } from './AudioPlayer';
@@ -26,6 +26,14 @@ export const AudioApp = () => {
     }
   });
 
+  // Use a ref to keep track of the latest value of userInputs
+  const userInputsRef = useRef(userInputs);
+
+  // Update the current value of the ref whenever userInputs changes
+  useEffect(() => {
+    userInputsRef.current = userInputs;
+  }, [userInputs]);
+
   const addAudioToQueue = (newBase64Audio) => {
     setAudioQueue((prevQueue) => [...prevQueue, newBase64Audio]);
   };
@@ -41,9 +49,12 @@ export const AudioApp = () => {
   };
 
   const onAudioData = async (base64Audio) => {
+    // Access the latest user inputs directly inside this function
+    const currentInputs = { ...userInputsRef.current };
+
     // Construct the payload with user inputs and the audio data
     const payload = {
-      ...userInputs,
+      ...currentInputs,
       audioBase64: base64Audio,
       requestId: getCurrentDateString()
     };
@@ -77,14 +88,14 @@ export const AudioApp = () => {
 
   const getCurrentDateString = () => {
     const now = new Date();
-  
+
     const year = now.getFullYear();
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const day = now.getDate().toString().padStart(2, '0');
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
-  
+
     return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
   };
 
